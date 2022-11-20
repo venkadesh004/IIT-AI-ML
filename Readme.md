@@ -10,8 +10,7 @@ saiarunaa@student.tce.edu
 prasannakumarg@student.tce.edu
 venkadesh@student.tce.edu
 mohammedquasim@student.tce.edu
-Team Name:
+Team Name:UKIYO
 Mentor Name:Dr.R.Leena Sri
 Mentor Mail ID:rlsit@tce.edu
 College Name: Thiagarajar college of Engineering,Madurai.
-Environment: Dependencies (Libraries used with their versions)

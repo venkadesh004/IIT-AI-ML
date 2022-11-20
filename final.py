@@ -2,6 +2,7 @@ import torch
 import cv2
 import pandas
 import numpy as np
+import csv
 
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 cap = cv2.VideoCapture("Hackathon video.mov")
@@ -88,6 +89,10 @@ def checkSlope(a):
     print(ms, m)
 
     if len(ms) > 1:
+        print(ms[len(ms)-1])
+        print(ms[len(ms)-2])
+        print(ms[len(ms)-1])
+        print(ms[len(ms)-2])
         if m > 1:
             if (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0]) < 1:
                 m = (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0])
