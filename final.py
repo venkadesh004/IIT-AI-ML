@@ -28,8 +28,8 @@ quadrant2 = [topLeft, left, bottomLeft, center]
 quadrant3 = [center, bottomLeft, bottom, bottomRight]
 quadrant4 = [topRight, center, bottomLeft, right]
 
-ms = []
-m = 0
+finalPatternList = []
+finalPattern = []
 
 def triangleArea(a, b, c):
     area = (a[0]*(b[1]-c[1])+b[0]*(c[1]-a[1])+c[0]*(a[1]-b[1]))
@@ -65,9 +65,9 @@ def splitTri(a, quadrant):
 
 def checkQuadrants(a):
     if splitTri(a, quadrant1):
-        return 1
-    elif splitTri(a, quadrant2):
         return 2
+    elif splitTri(a, quadrant2):
+        return 1
     elif splitTri(a, quadrant3):
         return 3
     elif splitTri(a, quadrant4):
@@ -80,34 +80,52 @@ def findPoint(xmin, ymin, xmax, ymax):
     midY = (ymax-ymin)+ymin
     return (midX, midY)
 
-def checkSlope(a):
-    global ms
-    global m
+def checkPattern(a):
+    finalPatternList.append(a)
 
-    ms.append(a)
+    # print("Initial: ", finalPattern)
+    # print("Initial: ", finalPatternList)
 
-    print(ms, m)
-
-    if len(ms) > 1:
-        print(ms[len(ms)-1])
-        print(ms[len(ms)-2])
-        print(ms[len(ms)-1])
-        print(ms[len(ms)-2])
-        if m > 1:
-            if (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0]) < 1:
-                m = (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0])
-                return True
+    if finalPatternList == []:
+        return False
+    elif len(finalPatternList) == 1:
+        return False
+    elif len(finalPatternList) >= 2:
+        xDif = finalPatternList[len(finalPatternList)-1][0]-finalPatternList[len(finalPatternList)-2][0]
+        yDif = finalPatternList[len(finalPatternList)-1][1]-finalPatternList[len(finalPatternList)-2][1]
+        if len(finalPattern) == 0:
+            if xDif >= 0:
+                finalPattern.append(1)
             else:
-                m = (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0])
+                finalPattern.append(-1)
+            if yDif >= 0:
+                finalPattern.append(1)
+            else:
+                finalPattern.append(-1)
         else:
-            if (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0]) > 1:
-                m = (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0])
-                return True
+            if finalPattern[0] == 1:
+                if xDif < 0:
+                    return True
             else:
-                m = (ms[len(ms)-1][1]-ms[len(ms)-2][1])/(ms[len(ms)-1][0]-ms[len(ms)-2][0])  
+                if xDif > 0:
+                    return True
+            if finalPattern[1] == 1:
+                if yDif < 0:
+                    return True
+            else:
+                if yDif > 0:
+                    return True
 
-    return False  
-    
+    # print(finalPattern)
+    # print(finalPatternList)
+    return False
+        
+result = 0    
+
+bounce_number = 1
+
+final = []
+
 while True:
 
     ret, frame = cap.read()
@@ -118,7 +136,7 @@ while True:
     results = model(frame[..., ::-1])
 
     if (results.pandas().xyxy[0].name[0] == "sports ball"):
-        print(i)
+        # print(i)
         # print(results.pandas().xyxy[0])
 
         xmin = int(results.pandas().xyxy[0].xmin[0])
@@ -135,18 +153,31 @@ while True:
 
         result = checkQuadrants(a)
 
-        print(result)
+        # print(result)
 
-        touch = checkSlope(result)
+        touch = checkPattern(a)
 
-        print(touch)
+        # print(touch)
+
+        if touch:
+            if result > 0:
+                print(result)
+                finalPatternList = []
+                finalPattern = []
+                final.append([bounce_number, cap.get(cv2.CAP_PROP_POS_MSEC), result, i])
+                bounce_number += 1
+                
+
+        lastResult = result
 
         # cv2.imwrite('./images/{}.jpg'.format(str(i)), frame)
 
     else:
 
-        ms = []
-        m = 0
+        finalPatternList = []
+        finalPattern = []
+        
+        lastResult = result
 
     cv2.imshow("Final", frame)
 
@@ -156,3 +187,11 @@ while True:
         break
 
     i += 1
+
+print(final)
+
+with open('solution.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    for i in final:
+        print(i)
+        writer.writerow(i)
